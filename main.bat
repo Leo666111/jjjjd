@@ -1,39 +1,35 @@
 @echo off
 setlocal enabledelayedexpansion
 
-:: Set the start time (in seconds)
-set start_time=%time%
+:: Set a time limit (60 seconds)
+set /a time_limit=60
 
-:: Convert start time to seconds
-for /f "tokens=1-4 delims=:.," %%a in ("%start_time%") do (
-    set /a start_seconds=%%a*3600 + %%b*60 + %%c
-)
+:: Start the timer
+set /a start_time=%time:~6,2%
 
 :loop
-:: Get the current time and convert it to seconds
-set current_time=%time%
-for /f "tokens=1-4 delims=:.," %%a in ("%current_time%") do (
-    set /a current_seconds=%%a*3600 + %%b*60 + %%c
-)
+:: Get the current time
+set /a current_time=%time:~6,2%
 
-:: Calculate the elapsed time
-set /a elapsed_time=current_seconds-start_seconds
+:: Calculate the elapsed time in seconds
+set /a elapsed_time=current_time-start_time
 
-:: Check if the elapsed time is greater than or equal to 60 seconds (1 minute)
-if !elapsed_time! geq 60 (
+:: If elapsed time is greater than or equal to 60 seconds, stop
+if !elapsed_time! geq !time_limit! (
     echo 1 minute has passed, stopping the script.
     exit /b
 )
 
-:: Perform the mouse movement commands
+:: Perform the mouse movement commands using nircmd
 nircmd.exe sendmouse move 100 100
 nircmd.exe sendmouse move 200 200
 nircmd.exe sendmouse move 300 300
 nircmd.exe sendmouse move 400 400
 nircmd.exe sendmouse move 500 500
 
-:: Wait for 0.5 seconds
+:: Wait for 0.5 seconds before the next move
 timeout /t 0.5 >nul
 
 :: Repeat the loop
 goto loop
+
