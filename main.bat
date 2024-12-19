@@ -1,35 +1,39 @@
-@echo off
-setlocal enabledelayedexpansion
+# Set the start time
+$startTime = Get-Date
 
-:: Set a time limit (60 seconds)
-set /a time_limit=60
+# Set the duration limit (60 seconds)
+$timeLimit = 60
 
-:: Start the timer
-set /a start_time=%time:~6,2%
+# Load the required library for simulating mouse movements
+Add-Type -TypeDefinition @"
+using System;
+using System.Runtime.InteropServices;
 
-:loop
-:: Get the current time
-set /a current_time=%time:~6,2%
+public class MouseSimulator {
+    [DllImport("user32.dll")]
+    public static extern bool SetCursorPos(int x, int y);
+}
+"@
 
-:: Calculate the elapsed time in seconds
-set /a elapsed_time=current_time-start_time
+# Start the loop
+while ($true) {
+    # Calculate the elapsed time in seconds
+    $elapsedTime = (New-TimeSpan -Start $startTime).TotalSeconds
 
-:: If elapsed time is greater than or equal to 60 seconds, stop
-if !elapsed_time! geq !time_limit! (
-    echo 1 minute has passed, stopping the script.
-    exit /b
-)
+    # Check if 60 seconds have passed
+    if ($elapsedTime -ge $timeLimit) {
+        Write-Host "1 minute has passed, stopping the script."
+        break
+    }
 
-:: Perform the mouse movement commands using nircmd
-nircmd.exe sendmouse move 100 100
-nircmd.exe sendmouse move 200 200
-nircmd.exe sendmouse move 300 300
-nircmd.exe sendmouse move 400 400
-nircmd.exe sendmouse move 500 500
+    # Move the mouse to different coordinates
+    [MouseSimulator]::SetCursorPos(100, 100)
+    [MouseSimulator]::SetCursorPos(200, 200)
+    [MouseSimulator]::SetCursorPos(300, 300)
+    [MouseSimulator]::SetCursorPos(400, 400)
+    [MouseSimulator]::SetCursorPos(500, 500)
 
-:: Wait for 0.5 seconds before the next move
-timeout /t 0.5 >nul
-
-:: Repeat the loop
-goto loop
+    # Wait for 0.5 seconds before moving the mouse again
+    Start-Sleep -Seconds 0.5
+}
 
